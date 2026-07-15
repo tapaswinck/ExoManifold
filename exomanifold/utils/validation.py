@@ -1,49 +1,86 @@
 """
-Validation utilities used thruoghout ExoManifold.
+Validation utilities used in ExoManifold.
 """
+
 
 from __future__ import annotations
 
+__all__ = [
+    "check_array",
+    "check_X_y",
+    "check_is_fitted",
+    "check_random_state"
+]
+
+
+from collections.abc import Iterable
 from typing import Any
+
 import numpy as np
 from numpy.typing import NDArray
-from collections.abc import Iterable
 
+from exomanifold.utils.exceptions import NotFittedError
 
-def check_array(X: NDArray[Any] | None)-> NDArray[Any]:
+def check_array(
+        X: NDArray[Any] | None,
+)-> NDArray[Any]:
     """
     Validate a feature matrix.
 
     Parameters
     ----------
-    X: numpy.ndarray
+    X: NDArray | None
         Input feature matrix.
 
     Returns
     -------
-    numpy.ndarray
-        Validated array
+    NDArray
+        Validated feature matrix.
+
+     Raises
+     ------
+     ValueError
+        If the input is None, empty, or not two-dimensional.   
     """
 
     if X is None:
-        raise ValueError("Input array cannot be None.")
+        raise ValueError("Input array cannot be empty.")
     
     X = np.asarray(X)
 
     if X.ndim != 2:
-        raise ValueError("Input array must be 2-dimensional.")
+        raise ValueError("Input array must be 2-dimenaional.")
     
     if X.shape[0] == 0:
-        raise ValueError("Input array cannot be empty.")
+        raise ValueError("Inpur array cannot be empty.")
     
     return X
 
 def check_X_y(
         X: NDArray[Any] | None,
         y: NDArray[Any] | None
-)->tuple[NDArray[Any], NDArray[Any]]:
+)-> tuple[NDArray[Any], NDArray[Any]]:
     """
-    Validatefeature matrix X and target vactor y.
+    Validate a feature matrix and target vector.
+
+    Parameters
+    ----------
+
+    X: NDArray | None
+        Feature matrix.
+
+    y: NDArray | None
+        Target vector.
+
+    Returns
+    -------
+    tuple[NDarray, NDArray]
+        Validated feature matrix and target vector.
+
+    Raises
+    ------
+    ValueError
+        If y is None, not one-dimensional, or has the wrong number of samples.
     """
 
     X = check_array(X)
@@ -51,14 +88,13 @@ def check_X_y(
     if y is None:
         raise ValueError("Target vector cannot be None.")
     
-    y = np.array(y)
+    y = np.asarray(y)
 
     if y.ndim != 1:
         raise ValueError("Target vector must be one-dimensional.")
     
     if X.shape[0] != y.shape[0]:
         raise ValueError("Feature matrix and target vector must contain the same number of samples.")
-    
 
     return X, y
 
@@ -71,36 +107,60 @@ def check_is_fitted(
 
     Parameters
     ----------
+
     estimator: object
         Estimator instance.
-
+    
     attributes: str | Iterable[str]
-        Attributes name or iterable of attribute names
-        expected after fittting.
+        Attribute name(s) expected after fitting.
+
+    Raises
+    ------
+    
+    AttributeError
+        If a required attribute does not exist.
+
+    NotFittedError
+        If a required attribute exists but is None.
     """
 
     if isinstance(attributes, str):
         attributes = [attributes]
 
         for attribute in attributes:
-
             if not hasattr(estimator, attribute):
                 raise AttributeError(
-                    f"{estimator.__class__.__name__} has not attribute '{attribute}'."
+                    f"{estimator.__class__.__name__} has no attribute '{attribute}'."
                 )
-            
-            if getattr(estimator, attribute) is None:
-                raise ValueError(
-                    f"{estimator.__class__.__name__} is not fitted yet."
-                )
-            
 
+
+            if getattr(estimator, attribute) is None:
+                raise NotFittedError(
+                    f"{estimator.__class__.__name__} has not been fitted."
+                )
+            
 
 def check_random_state(
         seed: int | np.random.Generator | None
-)->np.random.Generator:
+)-> np.random.Generator:
     """
-    Validate and return a NumPy random number generator.
+    Return a NumPy random number generator.
+
+    Parameters
+    ----------
+    seed: int | Generator | None
+        Seed or existing Generator
+
+    
+    Returns
+    -------
+    numpy.random.Generator
+        Random number generator.
+    
+    Raises
+    ------
+    TypeError
+        If seed has an invalid type.
     """
 
     if seed is None:
@@ -108,11 +168,11 @@ def check_random_state(
     
     if isinstance(seed, np.random.Generator):
         return seed
-    
+
     if isinstance(seed, int):
         return np.random.default_rng(seed)
     
     raise TypeError(
-        "seed must be an int, Generator or None."
+        "seed must be an int, numpy.random.Generator, or None."  
     )
 
