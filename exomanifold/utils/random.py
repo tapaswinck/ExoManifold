@@ -7,7 +7,7 @@ import os
 import random
 import numpy as np
 
-def set_random_seed(seed: int = 42)-> None:
+def seed_everything(seed: int = 42)-> None:
     """
     Set random seed for reproducibility.
 
@@ -22,4 +22,3 @@ def set_random_seed(seed: int = 42)-> None:
 
     os.environ["PYTHONHASHSEED"] = str(seed)
 
-    
