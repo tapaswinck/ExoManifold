@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>68", "wheel"]
+build_backend = "setuptools.build_meta"
+
+[project]
+name = "exomanifold"
+version = "0.1.0"
+description = "UMAP-based manifold learning for exoplanet light curves"
+readme = "README.md"
+requires-python = ">=3.11"
+
+authors = [
+    {name = "Chiruvanuru Kumar Tapaswin"}
+]
+
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "pandas",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include=["exomanifold"]
