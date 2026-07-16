@@ -5,6 +5,14 @@ Validation utilities used in ExoManifold.
 
 from __future__ import annotations
 
+
+__all__ = [
+    "check_array",
+    "check_X_y",
+    "check_is_fitted",
+    "check_random_state",
+]
+
 __all__ = [
     "check_array",
     "check_X_y",
@@ -176,3 +184,46 @@ def check_random_state(
         "seed must be an int, numpy.random.Generator, or None."  
     )
 
+def check_vector(
+    x: NDArray[Any] | None,
+    *,
+    name: str = "array",
+) -> NDArray[Any]:
+    """
+    Validate a one-dimensional vector.
+
+    Parameters
+    ----------
+    x : ndarray | None
+        Input vector.
+
+    name : str
+        Name used in error messages.
+
+    Returns
+    -------
+    ndarray
+        Validated vector.
+
+    Raises
+    ------
+    ValueError
+        If the vector is invalid.
+    """
+
+    if x is None:
+        raise ValueError(f"{name} cannot be None.")
+
+    x = np.asarray(x)
+
+    if x.ndim != 1:
+        raise ValueError(
+            f"{name} must be one-dimensional."
+        )
+
+    if x.size == 0:
+        raise ValueError(
+            f"{name} cannot be empty."
+        )
+
+    return x

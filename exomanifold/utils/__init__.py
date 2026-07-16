@@ -20,7 +20,8 @@ from .validation import (
     check_array,
     check_is_fitted,
     check_random_state,
-    check_X_y
+    check_X_y,
+    check_vector
 )
 
 __all__ = [
@@ -48,6 +49,8 @@ __all__ = [
     "get_logger",
 
     # Random
-    "seed_everything"
+    "seed_everything",
+
+    "check_vector"
 ]
 

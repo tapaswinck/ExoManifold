@@ -1,0 +1,153 @@
+"""
+Phase-folded light curve class.
+"""
+
+from __future__ import annotations
+
+
+from dataclasses import dataclass, field, replace
+
+import numpy as np
+from numpy.typing import NDArray
+
+from exomanifold.utils.validation import (
+    check_array,
+    check_vector,
+)
+
+
+__all__ = [
+    "PhaseFoldedLightCurve"
+]
+
+@dataclass(frozen=True, slots = True)
+class PhaseFoldedLightCurve:
+    """
+    Immutable phase-folded light curve.
+
+    Parameters
+    ----------
+    phase: ndarray
+        Orbital phase
+    
+    flux: ndarray
+        Flux values
+
+    flux_err: ndarray | None, optional
+        Flux uncertainties
+    
+    target: str | None
+        target identifier
+    
+    mission: str | None
+        Kepler, TESS, etc
+    
+    period: float
+        Orbital period
+
+    epoch: float
+        Transit epoch
+
+    metadata: dict
+        additional metadata
+    """
+
+    phase: NDArray[np.float64]
+    flux: NDArray[np.float64]
+
+    flux_err: NDArray[np.float64] | None = None
+    
+    target: str | None = None
+    mission: str | None = None
+
+    period: float = 0.0
+    epoch: float = 0.0
+
+    metadata: dict = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        phase = np.asarray(self.phase, dtype=float)
+        flux = np.asarray(self.flux, dtype=float)
+
+        phase = check_vector(phase, name="phase")
+        flux = check_vector(flux, name="flux")
+
+        if len(phase) != len(flux):
+            raise ValueError("phase and flux must have the same length.")
+
+        if self.flux_err is not None:
+            flux_err = np.asarray(self.flux_err, dtype=float)
+            flux_err = check_vector(flux_err, name="flux_err")
+
+            if len(flux_err) != len(phase):
+                raise ValueError(
+                    "flux_err must have the same length as phase."
+                )
+
+            object.__setattr__(self, "flux_err", flux_err)
+
+        if self.period <= 0:
+            raise ValueError("period must be positive.")
+
+        if np.any((phase < 0.0) | (phase > 1.0)):
+            raise ValueError("phase values must lie between 0 and 1.")
+
+        object.__setattr__(self, "phase", phase)
+        object.__setattr__(self, "flux", flux)
+
+    
+    @property
+    def n_samples(self)-> int:
+        """
+        Number of observations.  
+        """
+        return len(self.phase)
+    
+    @property
+    def has_flux_errors(self)-> bool:
+        """
+        True if flux uncertainties exist.
+        """
+
+        return self.flux_err is not None
+    
+    def __len__(self) -> int:
+        return len(self.phase)
+    
+    def sort(self) -> "PhaseFoldedLightCurve":
+        """
+        return a copy sorted by phase.
+        """
+
+        order = np.argsort(self.phase)
+
+        return replace(
+            self,
+            phase = self.phase[order],
+            flux = self.flux[order],
+            flux_err = (
+                None
+                if self.flux_err is None
+                else
+                self.flux_err[order]
+            )
+        )
+    
+    def copy(self) -> "PhaseFoldedLightCurve":
+        """
+        Return a deep copy.
+        """
+        return replace(
+            self,
+            phase = self.phase.copy(),
+            flux = self.flux.copy(),
+            flux_err = (
+                None
+                if self.flux_err is None
+                else
+                self.flux_err.copy()
+            ),
+            metadata = self.metadata.copy()
+        )
+    
+
