@@ -18,6 +18,10 @@ dependencies = [
     "scipy",
     "matplotlib",
     "pandas",
+    "pytest",
+    "lightkurve",
+    "astroquery",
+    "astropy"
 ]
 
 [tool.setuptools]
