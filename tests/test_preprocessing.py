@@ -74,3 +74,53 @@ def test_preprocessing_does_not_modify_original(sample_curve):
         equal_nan=True,
     )
 
+def test_sigma_clip_removes_outlier():
+
+    curve = ExoLightCurve(
+        time=np.arange(6.0),
+        flux=np.array([1.0, 1.0, 1.0, 100.0, 1.0, 1.0]),
+        target="Test",
+        mission="Kepler",
+    )
+
+    preprocessor = ExoProcessor()
+
+    clipped = preprocessor.sigma_clip(
+        curve,
+        sigma=2.0,
+    )
+
+    assert len(clipped) == 5
+
+    assert np.max(clipped.flux) < 100.0
+
+
+def test_sigma_clip_keeps_clean_curve():
+
+    curve = ExoLightCurve(
+        time=np.arange(5.0),
+        flux=np.ones(5),
+        target="Test",
+        mission="Kepler",
+    )
+
+    preprocessor = ExoProcessor()
+
+    clipped = preprocessor.sigma_clip(curve)
+
+    assert len(clipped) == len(curve)
+
+
+def test_sigma_clip_does_not_modify_original(sample_curve):
+
+    preprocessor = ExoProcessor()
+
+    original = sample_curve.flux.copy()
+
+    _ = preprocessor.sigma_clip(sample_curve)
+
+    assert np.array_equal(
+        sample_curve.flux,
+        original,
+        equal_nan=True,
+    )

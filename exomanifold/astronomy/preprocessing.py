@@ -3,8 +3,12 @@ from __future__ import annotations
 from dataclasses import replace
 
 import numpy as np
+import numpy.ma as ma
+from typing import cast
 
 from exomanifold.astronomy.lightcurve import ExoLightCurve
+from astropy.stats import sigma_clip
+
 __all__ = [
     "ExoProcessor"
 ]
@@ -136,5 +140,65 @@ class ExoProcessor:
                 None
                 if curve.flux_err is None
                 else curve.flux_err / median
+            ),
+        )
+    
+    def sigma_clip(
+            self,
+            curve: ExoLightCurve,
+            sigma: float = 5.0,
+            maxiters: int | None = 5
+    )->ExoLightCurve:
+        """
+        Remove outliers using sigma clipping.
+
+        Parameters
+        ----------
+        curve: ExoLightCurve
+            Inpur light curve.
+
+        sigma: float, default = 5.0
+            Number of standard deviations for clipping.
+        
+        maxiters: int | None, default = 5
+            Maximum number of clipping iterations.
+
+
+        Returns
+        -------
+        ExoLightCurve
+            Sigma-clipped light curve.
+
+        """
+
+
+        clipped = cast(
+            ma.MaskedArray,
+            sigma_clip(
+                curve.flux,
+                sigma=sigma,
+                maxiters=maxiters,
+                masked=True,
+            ),
+        )
+
+        
+        mask = ~clipped.mask
+
+
+
+        return replace(
+            curve,
+            time=curve.time[mask],
+            flux=curve.flux[mask],
+            flux_err=(
+                None
+                if curve.flux_err is None
+                else curve.flux_err[mask]
+            ),
+            quality=(
+                None
+                if curve.quality is None
+                else curve.quality[mask]
             ),
         )
