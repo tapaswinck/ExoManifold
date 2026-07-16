@@ -1,5 +1,19 @@
 from pathlib import Path
 
+__all__ = [
+    "DATA_DIR",
+    "RAW_DATA_DIR",
+    "CACHE_DIR",
+    "PROCESSED_DIR",
+    "FOLDED_DATA_DIR",
+    "EMBEDDING_DIR",
+    "MODELS_DIR",
+    "RESULTS_DIR",
+    "FIGURES_DIR",
+    "LOG_DIR",
+]
+
+
 PACKAGE_ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = PACKAGE_ROOT.parent
 
@@ -35,4 +49,3 @@ _DIRECTORIES = [
 for directory in _DIRECTORIES:
     directory.mkdir(parents=True, exist_ok=True)
 
-    
