@@ -11,13 +11,13 @@ import numpy as np
 from numpy.typing import NDArray
 
 from exomanifold.utils.validation import (
-    check_array,
     check_vector,
 )
 
 
 __all__ = [
-    "PhaseFoldedLightCurve"
+    "PhaseFoldedLightCurve",
+    "PhaseFolder"
 ]
 
 @dataclass(frozen=True, slots = True)
@@ -149,5 +149,41 @@ class PhaseFoldedLightCurve:
             ),
             metadata = self.metadata.copy()
         )
+class PhaseFolder:
+    """
+    Phase-fold astronomical light curves.
+
+    Parameters
+    ----------
+    period: float
+        Orbital period
     
+    epoch: float
+        Reference transit epoch
+        
+    bins: int, default = 200
+        Number of phase bins
+    
+    wrap_phase: bool, default = True
+        Wrap phase into the interval [0,1)
+    """
+
+    def __init__(
+            self,
+            period: float,
+            epoch: float,
+            bins: int = 200,
+            wrap_phase: bool = True
+    )-> None:
+        
+        if period <= 0:
+            raise ValueError("period must be positive.")
+        
+        if bins <= 1:
+            raise ValueError("bins must greater than one.")
+        
+        self.period = float(period)
+        self.epoch = float(epoch)
+        self.bins = int(bins)
+        self.wrap_phase = wrap_phase
 

@@ -1,7 +1,11 @@
 import numpy as np
 import pytest
 
-from exomanifold.astronomy import PhaseFoldedLightCurve
+from exomanifold.astronomy import (
+    PhaseFoldedLightCurve,
+    PhaseFolder
+)
+
 
 
 def test_constructor_valid():
@@ -174,3 +178,34 @@ def test_copy():
     copied.metadata["planet"] = "Changed"
 
     assert curve.metadata["planet"] == "Kepler-10 b"
+
+
+
+def test_phasefolder_constructor():
+
+    folder = PhaseFolder(
+        period=10.0,
+        epoch=0.5,
+        bins=200,
+    )
+
+    assert folder.period == 10.0
+    assert folder.epoch == 0.5
+    assert folder.bins == 200
+
+def test_phasefolder_invalid_period():
+
+    with pytest.raises(ValueError):
+        PhaseFolder(
+            period=0.0,
+            epoch=0.0,
+        )
+
+def test_phasefolder_invalid_bins():
+
+    with pytest.raises(ValueError):
+        PhaseFolder(
+            period=10.0,
+            epoch=0.0,
+            bins=1,
+        )
