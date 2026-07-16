@@ -6,6 +6,7 @@ from __future__ import annotations
 
 
 from dataclasses import dataclass, field, replace
+from .lightcurve import ExoLightCurve
 
 import numpy as np
 from numpy.typing import NDArray
@@ -187,3 +188,30 @@ class PhaseFolder:
         self.bins = int(bins)
         self.wrap_phase = wrap_phase
 
+    def compute_phase(
+            self,
+            curve: ExoLightCurve,
+    )-> NDArray[np.float64]:
+        """
+        Compute orbital phase for every observation.
+
+        Parameters
+        ----------
+        curve: ExoLightCurve
+            Input light curve
+        
+        Returns
+        -------
+        ndarray
+            Phase values in the interval [0,1)
+        """
+
+        phase = (curve.time  - self.epoch) / self.period
+
+        if self.wrap_phase:
+            phase = np.mod(phase, 1.0)
+
+        return phase.astype(np.float64)
+    
+    
+    

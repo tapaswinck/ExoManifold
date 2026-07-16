@@ -6,7 +6,7 @@ from exomanifold.astronomy import (
     PhaseFolder
 )
 
-
+from exomanifold.astronomy.lightcurve import ExoLightCurve
 
 def test_constructor_valid():
 
@@ -209,3 +209,39 @@ def test_phasefolder_invalid_bins():
             epoch=0.0,
             bins=1,
         )
+
+def test_compute_phase():
+
+    curve = ExoLightCurve(
+        time=np.array([0.0, 2.5, 5.0, 7.5]),
+        flux=np.ones(4),
+    )
+
+    folder = PhaseFolder(
+        period=5.0,
+        epoch=0.0,
+    )
+
+    phase = folder.compute_phase(curve)
+
+    expected = np.array([0.0, 0.5, 0.0, 0.5])
+
+    np.testing.assert_allclose(phase, expected)
+
+def test_compute_phase_shifted_epoch():
+
+    curve = ExoLightCurve(
+        time=np.array([1.0, 3.5, 6.0]),
+        flux=np.ones(3),
+    )
+
+    folder = PhaseFolder(
+        period=5.0,
+        epoch=1.0,
+    )
+
+    phase = folder.compute_phase(curve)
+
+    expected = np.array([0.0, 0.5, 0.0])
+
+    np.testing.assert_allclose(phase, expected)
