@@ -10,6 +10,11 @@ from .phasefold import (
     PhaseFolder
 )
 
+from .transit import (
+    TransitDetector,
+    TransitEvent,
+    TransitSearchResult
+)
 
 __all__ = [
     "ExoLightCurve",
@@ -17,5 +22,10 @@ __all__ = [
     "ExoProcessor",
     "PhaseFoldedLightCurve",
     "PhaseFolder",
+    "TransitDetector",
+    "TransitEvent",
+    "TransitSearchResult"
 ]
+
+
 
