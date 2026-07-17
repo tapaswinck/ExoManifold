@@ -2,6 +2,14 @@
 Custom exceptions used throughout ExoManifold.
 """
 
+__all__ = [
+    "ExoManifoldError",
+    "NotFittedError",
+    "InvalidLightCurveError",
+    "DatasetError",
+]
+
+
 class ExoManifoldError(Exception):
 
     """
@@ -24,4 +32,3 @@ class DatasetError(ExoManifoldError):
     """
 
 
-    

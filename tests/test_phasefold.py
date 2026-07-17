@@ -245,3 +245,117 @@ def test_compute_phase_shifted_epoch():
     expected = np.array([0.0, 0.5, 0.0])
 
     np.testing.assert_allclose(phase, expected)
+
+def test_sort_phase_already_sorted():
+    folder = PhaseFolder(period = 10.0, epoch=0.0)
+
+    phase = np.array([0.1, 0.2, 0.3])
+    flux = np.array([10.0,20.0,30.0])
+
+    sorted_phase, sorted_flux, sorted_err = folder.sort_phase(phase, flux)
+
+    np.testing.assert_array_equal(sorted_phase, phase)
+    np.testing.assert_array_equal(sorted_flux, flux)
+    
+    assert sorted_err is None
+
+def test_sorted_phase_reverse():
+
+    folder = PhaseFolder(period = 10.0, epoch = 0.0)
+
+    phase = np.array([0.9,0.5,0.1])
+    flux = np.array([9.0,5.0,1.0])
+    
+    sorted_phase, sorted_flux,_ = folder.sort_phase(phase, flux)
+
+
+    np.testing.assert_array_equal(sorted_phase, np.array([0.1,0.5,0.9]))
+
+    np.testing.assert_array_equal(sorted_flux, np.array([1.0,5.0,9.0]))
+
+def test_sort_phase_with_flux_errors():
+    folder = PhaseFolder(period = 10.0, epoch = 0.0)
+
+    phase = np.array([0.5,0.1,0.3])
+    flux = np.array([5.0,1.0,3.0])
+    flux_err = np.array([0.5,0.1,0.3])
+
+    p, f, e = folder.sort_phase(phase, flux, flux_err)
+
+    np.testing.assert_array_equal(p, np.array([0.1,0.3,0.5]))
+
+    np.testing.assert_array_equal(f, np.array([1.0,3.0,5.0]))
+
+    np.testing.assert_array_equal(e, np.array([0.1,0.3,0.5]))
+
+
+def test_sort_phase_mismatched_lengths():
+    folder = PhaseFolder(period = 10.0, epoch = 0.0)
+
+    with pytest.raises(ValueError):
+        folder.sort_phase(
+            np.array([0.1,0.3]),
+            np.array([1.0])      
+        )
+
+
+def test_bin_phase():
+
+    folder = PhaseFolder(
+        period=10.0,
+        epoch=0.0,
+        bins=2,
+    )
+
+    curve = folder.bin_phase(
+        phase=np.array([0.1, 0.2, 0.7, 0.8]),
+        flux=np.array([1.0, 2.0, 3.0, 4.0]),
+    )
+
+    np.testing.assert_allclose(
+        curve.phase,
+        np.array([0.15, 0.75]),
+    )
+
+    np.testing.assert_allclose(
+        curve.flux,
+        np.array([1.5, 3.5]),
+    )
+
+def test_bin_phase_skips_empty_bins():
+
+    folder = PhaseFolder(
+        period=10.0,
+        epoch=0.0,
+        bins=5,
+    )
+
+    curve = folder.bin_phase(
+        phase=np.array([0.10, 0.15]),
+        flux=np.array([1.0, 2.0]),
+    )
+
+    assert len(curve) == 1
+
+def test_bin_phase_flux_errors():
+
+    folder = PhaseFolder(
+        period=10.0,
+        epoch=0.0,
+        bins=2,
+    )
+
+    curve = folder.bin_phase(
+        phase=np.array([0.1, 0.2, 0.7, 0.8]),
+        flux=np.array([1, 2, 3, 4]),
+        flux_err=np.array([0.1, 0.2, 0.3, 0.4]),
+    )
+
+    assert curve.flux_err is not None
+
+    np.testing.assert_allclose(
+        curve.flux_err,
+        np.array([0.15, 0.35])
+    )
+
+    
